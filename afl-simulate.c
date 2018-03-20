@@ -130,7 +130,7 @@ void run() {
     largest = diff;
   total += diff;
   sec = diff / 1000000000;
-  tsec = (diff % 1000000000) / 1000;
+  tsec = (diff % 1000000000) / 1000000;
   fprintf(stderr, "%s run=%d time=%d.%03d result=%d buckets=%u fills=%lu\n", prog, no, sec, tsec, status, buckets, fills);
 }
 
@@ -173,11 +173,11 @@ int main(int argc, char **argv) {
 
   total = total / no;
   sec1 = total / 1000000000;
-  tsec1 = (total % 1000000000) / 1000;
+  tsec1 = (total % 1000000000) / 1000000;
   sec2 = smallest / 1000000000;
-  tsec2 = (smallest % 1000000000) / 1000;
+  tsec2 = (smallest % 1000000000) / 1000000;
   sec3 = largest / 1000000000;
-  tsec3 = (largest % 1000000000) / 1000;
+  tsec3 = (largest % 1000000000) / 1000000;
   fprintf(stderr, "Average=%u.%03u min=%u.%03u max=%u.%03u\n", sec1, tsec1, sec2, tsec2, sec3, tsec3);
 
   return 0;
