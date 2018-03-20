@@ -18,6 +18,7 @@ You can use afl-gcc/afl-g++, afl-clang-fast/afl-clang++-fast, afl-dyninst or
 your own like a Pin module to produce the instrumented binary
 
 Example:
+```
 $ afl-simulate -i 10 pin -t obj-intel64/afl-pin.so -forkserver -- ./unrar-unmodified t test.rar > /dev/null
 pin run=1 time=0.489706 result=0 buckets=995 fills=5392
 pin run=2 time=0.494072 result=0 buckets=995 fills=5392
@@ -32,7 +33,7 @@ pin run=10 time=0.487264 result=0 buckets=995 fills=5392
 Error reading fork server	<= this message actually comes from the instrumented binary
 End: client finished
 Average=0.493521 min=0.483401 max=0.507898
-
+```
 
 Have fun!
 
