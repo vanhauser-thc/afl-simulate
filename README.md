@@ -30,10 +30,12 @@ pin run=7 time=0.507124 result=0 buckets=995 fills=5392
 pin run=8 time=0.507898 result=0 buckets=995 fills=5392
 pin run=9 time=0.483421 result=0 buckets=995 fills=5392
 pin run=10 time=0.487264 result=0 buckets=995 fills=5392
-Error reading fork server	<= this message actually comes from the instrumented binary
+Error reading fork server    <== this message actually comes from the instrumented binary
 End: client finished
 Average=0.493521 min=0.483401 max=0.507898
 ```
+
+supports AFL_PRELOAD
 
 Have fun!
 

@@ -16,24 +16,24 @@ uint8_t *trace_bits = NULL, *prog = NULL;
 
 void init_forkserver(char **argv) {
   int32_t st_pipe[2], ctl_pipe[2], i = 0;
-  uint8_t id_string[256], ex[4096] = "";
+  uint8_t id_string[256], ex[4096] = "", *pre;
 
   if (pipe(st_pipe) || pipe(ctl_pipe)) {
-    fprintf(stderr, "pipe() failed \n");
+    fprintf(stderr, "Error: pipe() failed \n");
     exit(-1);
   }
 
   int32_t forksrv_pid = fork();
 
   if (forksrv_pid < 0)
-    fprintf(stderr, "fork() failed \n");
+    fprintf(stderr, "Error: fork() failed \n");
 
   if (forksrv_pid == 0) {
     setsid();
     if (dup2(ctl_pipe[0], FORKSRV_FD) < 0)
-      fprintf(stderr, "dup2() failed \n");
+      fprintf(stderr, "Error: dup2() failed \n");
     if (dup2(st_pipe[1], FORKSRV_FD + 1) < 0)
-      fprintf(stderr, "dup2() failed \n");
+      fprintf(stderr, "Error: dup2() failed \n");
 
     close(ctl_pipe[0]);
     close(ctl_pipe[1]);
@@ -41,19 +41,24 @@ void init_forkserver(char **argv) {
     close(st_pipe[1]);
     i = 0;
     while (argv[i] != NULL) {
-      strcat(ex, " ");
       strcat(ex, argv[i]);
+      strcat(ex, " ");
       i++;
     }
 
     sprintf(id_string, "%d", shm_id);
     setenv("__AFL_SHM_ID", id_string, 1);
+    
     if (verbose) fprintf(stderr, "SHM_ID=%s\n", id_string);
-
+    if ((pre = getenv("AFL_PRELOAD")) != NULL) {
+      setenv("LD_PRELOAD", pre, 1);
+      if (verbose) fprintf(stderr, "LD_PRELOAD=%s\n", pre);
+    }
     if (verbose) fprintf(stderr, "cmdline=%s\n", ex);
+
     (system(ex)+1);
 
-    fprintf(stderr, "End: client finished\n");
+    fprintf(stderr, "END=client finished\n");
 
     exit(0);
   }
@@ -68,7 +73,7 @@ void init_forkserver(char **argv) {
   int32_t rlen = read(fsrv_st_fd, &status, 4);
 
   if (rlen == 4) {
-    if (verbose) fprintf(stderr, "Ready: fork server is up.\n");
+    if (verbose) fprintf(stderr, "READY=fork server is up.\n");
     return;
   }
 
@@ -144,6 +149,9 @@ int main(int argc, char **argv) {
     argc -= 2;
   }
   prog = argv[1];
+  
+  if (getenv("AFL_VERBOSE") != NULL)
+    verbose = 1;
 
   shm_id = shmget(IPC_PRIVATE, 65536, IPC_CREAT | IPC_EXCL | 0600);
 
