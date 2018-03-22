@@ -135,7 +135,7 @@ void run() {
 }
 
 int main(int argc, char **argv) {
-  uint32_t iter = 10, sec1, sec2, sec3, tsec1, tsec2, tsec3;
+  uint32_t iter = 10, sec1, sec2, sec3, tsec1, tsec2, tsec3, i;
   int32_t sth = 0;
 
   if (argc < 2 || strcmp(argv[1], "-h") == 0) {
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  for (int i = 0; i < iter; i++)
+  for (i = 0; i < iter; i++)
     run();
 
   // end it
