@@ -10,7 +10,7 @@
 #define FORKSRV_FD          198
 
 uint64_t total = 0, smallest = (uint64_t) -1, largest = 0, lastfills;
-uint32_t lastbuckets, lasthighest, unstable = 0;
+uint32_t lastbuckets, lasthighest, stable = 0;
 int32_t fsrv_ctl_fd, fsrv_st_fd, shm_id;
 uint32_t verbose = 0, no = 0;
 uint8_t *trace_bits = NULL, *prog = NULL;
@@ -139,13 +139,15 @@ void run(int iter) {
     lastfills = fills;
     lasthighest = highest;
     lastbuckets = buckets;
+    stable++;
   } else if (lastfills != fills || lasthighest != highest || lastbuckets != buckets) {
-    unstable++;
+    stable++;
     lastfills = fills;
     lasthighest = highest;
     lastbuckets = buckets;
     was_stable = 0;
-  }
+  } else
+    stable++;
   fprintf(stderr, "%s run=%d time=%u.%06d result=%d buckets=%u fills=%lu highestfill=%u stable=%s\n", prog, no, sec, tsec, status, buckets, fills, highest, ((was_stable == 1) ? "yes" : "no"));
 }
 
@@ -194,7 +196,7 @@ int main(int argc, char **argv) {
   tsec2 = (smallest % 1000000000) / 1000;
   sec3 = largest / 1000000000;
   tsec3 = (largest % 1000000000) / 1000;
-  fprintf(stderr, "Average=%u.%06u min=%u.%06u max=%u.%06u unstable=%u/%u buckets=%u fills=%lu highestfill=%u\n", sec1, tsec1, sec2, tsec2, sec3, tsec3, unstable, iter, lastbuckets, lastfills, lasthighest);
+  fprintf(stderr, "Average=%u.%06u min=%u.%06u max=%u.%06u stability=%u/%u buckets=%u fills=%lu highestfill=%u\n", sec1, tsec1, sec2, tsec2, sec3, tsec3, stable, iter, lastbuckets, lastfills, lasthighest);
 
   return 0;
 }
