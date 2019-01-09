@@ -8,6 +8,7 @@
 #include <time.h>
 
 #define FORKSRV_FD          198
+#define MAPSIZE		    65536
 
 uint64_t total = 0, smallest = (uint64_t) -1, largest = 0, lastfills;
 uint32_t lastbuckets, lasthighest, stable = 0;
@@ -89,7 +90,7 @@ void run(int iter) {
   struct timespec ts1, ts2;
   int was_stable = 1;
 
-  memset(trace_bits, 0, 65536);
+  memset(trace_bits, 0, MAPSIZE);
 
   if ((res = write(fsrv_ctl_fd, &sth, 4)) != 4) {
     fprintf(stderr, "Error: unable to request new process from fork server -- write fd!\n");
@@ -99,7 +100,7 @@ void run(int iter) {
   res = read(fsrv_st_fd, &child_pid, 4);
   clock_gettime(CLOCK_REALTIME, &ts1);
   if (res != 4) {
-    fprintf(stderr, "Error: unable to request new preocess from fork server -- recv child_pid!\n");
+    fprintf(stderr, "Error: unable to request new process from fork server -- recv child_pid!\n");
     return;
   }
 
@@ -119,7 +120,7 @@ void run(int iter) {
   if (verbose) fprintf(stderr, "result=%d\n", status);
 
   no++;
-  for (counter = 0; counter < 65536; counter++) {
+  for (counter = 0; counter < MAPSIZE; counter++) {
     if (trace_bits[counter] != 0) {
       buckets++;
       fills += trace_bits[counter];
@@ -156,8 +157,9 @@ int main(int argc, char **argv) {
   int32_t sth = 0;
 
   if (argc < 2 || strcmp(argv[1], "-h") == 0) {
-    printf("Syntax: %s [-i count] program args\n", argv[0]);
-    printf("Default iterations are 10\n");
+    printf("afl-simulate (c) 2018-2019 by Marc Heuse <mh@mh-sec.de>\n");
+    printf("\nSyntax: %s [-i count] program args\n", argv[0]);
+    printf("\nDefault iterations are 10\n");
     return 0;
   }
   if (strcmp(argv[1], "-i") == 0) {
@@ -170,7 +172,7 @@ int main(int argc, char **argv) {
   if (getenv("AFL_VERBOSE") != NULL)
     verbose = 1;
 
-  shm_id = shmget(IPC_PRIVATE, 65536, IPC_CREAT | IPC_EXCL | 0600);
+  shm_id = shmget(IPC_PRIVATE, MAPSIZE, IPC_CREAT | IPC_EXCL | 0600);
 
   init_forkserver(&argv[1]);
 
@@ -197,6 +199,7 @@ int main(int argc, char **argv) {
   sec3 = largest / 1000000000;
   tsec3 = (largest % 1000000000) / 1000;
   fprintf(stderr, "Average=%u.%06u min=%u.%06u max=%u.%06u stability=%u/%u buckets=%u fills=%lu highestfill=%u\n", sec1, tsec1, sec2, tsec2, sec3, tsec3, stable, iter, lastbuckets, lastfills, lasthighest);
+  fprintf(stderr, "Analysis: stability=%s buckets/fills=%s\n", stable == iter ? "good" : "bad", lastfills < (MAPSIZE >> 1) ? "good" : ( lastfills >= (MAPSIZE << 1) ? "bad" : "medium" ));
 
   return 0;
 }
