@@ -142,7 +142,6 @@ void run(int iter) {
     lastbuckets = buckets;
     stable++;
   } else if (lastfills != fills || lasthighest != highest || lastbuckets != buckets) {
-    stable++;
     lastfills = fills;
     lasthighest = highest;
     lastbuckets = buckets;
