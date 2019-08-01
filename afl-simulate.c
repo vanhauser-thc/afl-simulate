@@ -112,6 +112,7 @@ void run(int iter) {
 
   res = read(fsrv_st_fd, &status, 4);
   clock_gettime(CLOCK_REALTIME, &ts2);
+
   if (res != 4) {
     fprintf(stderr, "Error: unable to communicate with fork server !\n");
     return;
@@ -122,6 +123,7 @@ void run(int iter) {
   no++;
   for (counter = 0; counter < MAPSIZE; counter++) {
     if (trace_bits[counter] != 0) {
+      if (verbose) printf("bucket[%04x]=%d\n", counter, trace_bits[counter]);
       buckets++;
       fills += trace_bits[counter];
       if (trace_bits[counter] > highest)
@@ -152,19 +154,30 @@ void run(int iter) {
 }
 
 int main(int argc, char **argv) {
-  uint32_t iter = 10, sec1, sec2, sec3, tsec1, tsec2, tsec3, i;
+  uint32_t iter = 1, sec1, sec2, sec3, tsec1, tsec2, tsec3, i;
   int32_t sth = 0;
 
   if (argc < 2 || strcmp(argv[1], "-h") == 0) {
     printf("afl-simulate (c) 2018-2019 by Marc Heuse <mh@mh-sec.de>\n");
-    printf("\nSyntax: %s [-i count] program args\n", argv[0]);
-    printf("\nDefault iterations are 10\n");
+    printf("\nSyntax: %s [-v] [-i count] program args\n", argv[0]);
+    printf("\nDefault iterations are %d\n", iter);
     return 0;
   }
-  if (strcmp(argv[1], "-i") == 0) {
+  while (strcmp(argv[1], "-v") == 0) {
+    verbose = 1;
+    argv++; argc--;
+  }
+  while (strcmp(argv[1], "-i") == 0) {
     iter = atoi(argv[2]);
     argv += 2;
     argc -= 2;
+  }
+  while(strcmp(argv[1], "-v") == 0) {
+    verbose = 1;
+    argv++; argc--;
+  }
+  while(strcmp(argv[1], "--") == 0) {
+    argv++; argc--;
   }
   prog = argv[1];
   
